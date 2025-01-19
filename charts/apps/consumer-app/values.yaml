@@ -1,0 +1,77 @@
+image:
+  repository: 975050207458.dkr.ecr.eu-north-1.amazonaws.com/node/consumer
+  pullPolicy: IfNotPresent
+  tag: "1.5"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  container:
+    port: 4000
+
+env:
+  KAFKA_BROKER: kafka-broker-headless.kafka.svc.cluster.local:9092
+  KAFKA_TOPIC: events
+  KAFKA_USERNAME: user1
+  KAFKA_PASSWORD: yRpkS8dtpr
+  CONSUMER_GROUP_ID: consumer-group
+  MONGO_URI: mongodb://root:B6jNH3IrqG@mongodb.mongodb.svc.cluster.local:27017/admin
+  MONGO_DB_NAME: eventsDB
+  MONGO_COLLECTION: events
+  DLQ_TOPIC: events-dlq
+  MAX_RETRIES: 3
+  METRICS_PORT: 4000
+
+replicaCount: 1
+
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: 2Gi
+#   requests:
+#     cpu: 150m
+#     memory: 256Mi
+
+affinity: {}
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 0
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 50
+
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/group.name: internal-apps
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: "subnet-0b8838623d69f5a21, subnet-09709a31cb3deaf9a"
+    alb.ingress.kubernetes.io/healthcheck-path: "/health"
+  ingressClassName: alb  
+  hosts:
+    - host: consumer-app.local
+      paths:
+        - path: /
+          pathType: Prefix

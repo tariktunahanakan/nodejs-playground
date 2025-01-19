@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "consumer-app.fullname" . }}
+  labels:
+    {{- include "consumer-app.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.env }}
+  {{ if typeIs "float64" $v }}{{ $k }}: {{ $v | int64 | toString | quote | trimSuffix "\n" }}
+  {{- else if $v }}{{ $k }}: {{ $v | trimSuffix "\n" }}
+  {{- else }}{{ $k }}: ''{{ end }}
+  {{- end }}
+

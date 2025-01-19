@@ -1,0 +1,23 @@
+{
+    "name": "api-service",
+    "version": "1.0.0",
+    "description": "Node.js API service that fetches events from MongoDB",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "keywords": [
+      "nodejs",
+      "express",
+      "mongodb",
+      "api"
+    ],
+    "author": "YourName",
+    "license": "ISC",
+    "dependencies": {
+      "express": "^4.18.2",
+      "mongodb": "^5.5.0",
+      "prom-client": "^14.0.0"
+    }
+  }
+  

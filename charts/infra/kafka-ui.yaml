@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafkaui
+  namespace: kafka
+spec:
+  containers:
+    - name: kafkaui
+      image: provectuslabs/kafka-ui
+      env:
+        - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+          value: kafka-controller-headless:9092
+      terminationMessagePolicy: File
+      imagePullPolicy: Always
+  restartPolicy: Always
