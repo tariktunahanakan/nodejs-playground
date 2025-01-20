@@ -160,15 +160,39 @@ Retrieve the Grafana admin password and access the dashboard:
 `kubectl get secret -n monitoring kube-prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
 kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80`
 
-#### 1. Install Pritunl
+### 1. Install Pritunl
+
 Install Pritunl on a separate EC2 instance to provide VPN access to internal services:
-`sudo apt update
-sudo apt install -y gnupg software-properties-common
-echo "deb https://repo.pritunl.com/stable/apt focal main" | sudo tee /etc/apt/sources.list.d/pritunl.list
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0CC3FD642696BFC8
-sudo apt update
-sudo apt install -y pritunl
-sudo systemctl start pritunl`
+
+> ```bash
+> sudo tee /etc/apt/sources.list.d/mongodb-org.list << EOF
+> deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse
+> EOF
+>
+> sudo tee /etc/apt/sources.list.d/openvpn.list << EOF
+> deb [ signed-by=/usr/share/keyrings/openvpn-repo.gpg ] https://build.openvpn.net/debian/openvpn/stable noble main
+> EOF
+>
+> sudo tee /etc/apt/sources.list.d/pritunl.list << EOF
+> deb [ signed-by=/usr/share/keyrings/pritunl.gpg ] https://repo.pritunl.com/stable/apt noble main
+> EOF
+>
+> sudo apt --assume-yes install gnupg
+>
+> curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor --yes
+> curl -fsSL https://swupdate.openvpn.net/repos/repo-public.gpg | sudo gpg -o /usr/share/keyrings/openvpn-repo.gpg --dearmor --yes
+> curl -fsSL https://raw.githubusercontent.com/pritunl/pgp/master/pritunl_repo_pub.asc | sudo gpg -o /usr/share/keyrings/pritunl.gpg --dearmor --yes
+> sudo apt update
+> sudo apt --assume-yes install pritunl openvpn mongodb-org wireguard wireguard-tools
+>
+> sudo ufw disable
+>
+> sudo systemctl start pritunl mongod
+> sudo systemctl enable pritunl mongod
+> ```
+
+![Pritunl Server](screenshots/Pritunl.png)
+
 
 ## Bonus Points Implemented
 #### Prometheus Metrics:
@@ -219,8 +243,24 @@ Implement a CI/CD pipeline using GitHub Actions or Jenkins to automate build, te
 Configure the App of Apps or ApplicationSet model to manage multiple microservices and infrastructure components from a single source of truth.
 Automate updates to Helm charts and Kubernetes manifests directly from the Git repository.
 
+## Accessing Ingress from the Browser
 
-```.
+If you want to access the Ingress through your browser, while connected to the Pritunl VPN, follow the steps below:
+
+### Add Entries to `/etc/hosts`
+
+> ### Add the Following Entries to `/etc/hosts`
+> ```plaintext
+> 10.0.3.40 consumer-app.local
+> 10.0.3.40 api-app.local
+> 10.0.3.40 producer-app.local
+> 10.0.3.40 grafana.local
+> 10.0.3.40 prometheus.local
+> ```
+
+---
+
+```plaintext
 ├── README.md                  # This document
 ├── charts                     # Helm charts for applications and infrastructure
 │   ├── infra                  # Infrastructure-related Helm charts

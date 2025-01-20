@@ -12,7 +12,7 @@
       "mongodb",
       "nodejs"
     ],
-    "author": "YourName",
+    "author": "tarik",
     "license": "ISC",
     "dependencies": {
       "kafkajs": "^2.2.4",
